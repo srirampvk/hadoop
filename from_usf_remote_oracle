@@ -1,0 +1,37 @@
+### Sqoop job to import data from USF academic Oracle database to HDFS location###
+### Finding the exact URL and JDBC JAR was really challenging and it took almost 2 hours to find the correct combination ####
+### I am using one mapper as I am aware that the number of records are less and parallelism in this case is inefficient ###
+### fields-terminated-by is the output file delimiter ###
+sqoop import \
+      --connect "jdbc:oracle:thin:@reade.forest.usf.edu:1521:cdb9" \
+      --username dw317 \
+      -P \
+      -m 1 \
+      --table DW317.CUSTOMER \
+      --fields-terminated-by , \
+      --target-dir /user/cloudera/usf \
+      --outdir sqoop_java_file
+
+### Sqoop to import data from same Oracle DB to Hive ###
+### Note - this table does not have  primary key. hence we have to specify split-by paramter ###
+
+sqoop import \
+      --connect "jdbc:oracle:thin:@reade.forest.usf.edu:1521:cdb9" \
+      --username dw317 \
+      -P \
+      --fields-terminated-by , \
+      --table SUPERSTORE.SALES_FACT \
+      --split-by order_id \ 
+      --target-dir /user/cloudera/usf/superstore \
+      --hive-import \
+      --hive-overwrite \
+      --create-hive-table \
+      --hive-table usf_superstore \
+      --outdir sqoop_java_file
+
+  --driver oracle.jdbc.driver.OracleDriver \  
+
+sqoop import \
+--connect jdbc:mysql://localhost/userdb \
+--username root \
+--table emp --m 1

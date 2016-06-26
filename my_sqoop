@@ -1,0 +1,65 @@
+#to list the databases
+sqoop list-databases \
+  --connect "jdbc:mysql://quickstart.cloudera:3306" \
+  --username retail_dba \
+  --password cloudera
+
+#to list the tables
+sqoop list-tables \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username retail_dba \
+  --password cloudera
+
+#evaluate statement
+sqoop eval \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username retail_dba \
+  --password cloudera \
+  --query "select count(1) from order_items"
+
+#importing all tables from mysql db
+sqoop import-all-tables \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username retail_dba \
+  --password cloudera \
+  -m 1 \
+  --warehouse-dir=/user/hive/warehouse/retail.db
+
+#importing all tables into hive, notice the three hive commands in this script
+#Also the number of mappers is not mentioned hence it took default of 4
+sqoop import-all-tables \
+  --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+  --username retail_dba \
+  -P \
+  --hive-import \
+  --hive-overwrite \
+  --create-hive-table \
+  --outdir java_files
+
+#importing a particular table into hdfs
+sqoop import \
+ --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+ --username retail_dba \
+ -P \
+ --table order_items \
+ --target-dir /user/cloudera/sqoop_import/order_items \
+ -m 5 \
+ --outdir jave_files
+
+#importing a table as a sequence file
+sqoop import \
+ --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+ --username retail_dba \
+ -P \
+ --table departments \
+ --as-sequencefile \
+ --target-dir=/user/cloudera/sqoop_import/departments
+
+#importing a table as an avro data file and creating an hive external table
+sqoop import \
+ --connect "jdbc:mysql://quickstart.cloudera:3306/retail_db" \
+ --username retail_dba \
+ --password cloudera \
+ --as-avrodatafile \
+ --table departments \
+ --target-dir=/user/cloudera/sqoop_import/department_avro
